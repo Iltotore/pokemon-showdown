@@ -1,0 +1,37 @@
+#:kivy 2.0.0
+#:import fit graphics.fit
+#:import center_pos graphics.center_pos
+#:import MDFillRoundFlatButton kivymd.uix.button.MDFillRoundFlatButton
+
+<SplashScreen>:
+    RelativeLayout:
+        canvas.before:
+            Color:
+                rgb: 0.588, 0.749, 0.894
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        Image:
+            source: "assets/misc/favicon.png"
+            size_hint: 0.5, 0.5
+            pos_hint: {"x": 0.25, "y": 0.25}
+
+
+<DashboardScreen>:
+    RelativeLayout:
+        canvas.before:
+            Color:
+                rgb: 1, 0.749, 0.894
+        Image:
+            allow_stretch: True
+            keep_ratio: True
+            source: "assets/background/charizard.jpg"
+            size_hint: None, None
+            size: fit(self.texture.size, self.parent.size)
+            pos: center_pos(self.size, self.parent.size)
+
+        MDFillRoundFlatButton:
+            id: "play"
+            icon: "android"
+            text: "Battle !"
+            pos: center_pos(self.size, self.parent.size, hint=(0.5, 0.2))
