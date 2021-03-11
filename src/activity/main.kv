@@ -1,7 +1,7 @@
 #:kivy 2.0.0
 #:import fit graphics.fit
 #:import center_pos graphics.center_pos
-#:import MDFillRoundFlatButton kivymd.uix.button.MDFillRoundFlatButton
+#:import MDFillRoundFlatIconButton kivymd.uix.button.MDFillRoundFlatIconButton
 
 <SplashScreen>:
     RelativeLayout:
@@ -30,8 +30,10 @@
             size: fit(self.texture.size, self.parent.size)
             pos: center_pos(self.size, self.parent.size)
 
-        MDFillRoundFlatButton:
+        MDFillRoundFlatIconButton:
             id: "play"
-            icon: "android"
+            icon: "pokeball"
             text: "Battle !"
-            pos: center_pos(self.size, self.parent.size, hint=(0.5, 0.2))
+            size_hint: 0.2, 0.075
+            font_size: 0.65*min(self.size)
+            pos: center_pos(self.size, self.parent.size, hint=(0.5, 0.05))

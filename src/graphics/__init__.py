@@ -1,6 +1,3 @@
-from kivy.uix.image import Image
-
-
 def fit(original_size, final_size):
     scale = max(final_size[0] / original_size[0], final_size[1] / original_size[1])
     return original_size[0] * scale, original_size[1] * scale

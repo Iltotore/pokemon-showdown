@@ -1,10 +1,11 @@
 import kivy
 from kivy.clock import Clock
-from kivy.uix.image import Image
+from kivy.core.window import Window
+from kivymd.app import MDApp
 
 kivy.require('2.0.0')
 
-from kivy.app import App, Builder
+from kivy.app import Builder
 
 from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition
 
@@ -17,7 +18,7 @@ class DashboardScreen(Screen):
     pass
 
 
-class MainApp(App):
+class MainApp(MDApp):
 
     def __init__(self):
         super(MainApp, self).__init__()
@@ -34,7 +35,9 @@ class MainApp(App):
 
 
 if __name__ == '__main__':
-    Builder.load_file("assets/activity/main.kv")
+    print(Window.size)
+    Builder.load_file("activity/main.kv")
+    """Window.size = (900, 700)
+    Window.left, Window.top = (0, 0)"""
     app = MainApp()
     app.run()
-
