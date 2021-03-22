@@ -1,7 +1,9 @@
 #:kivy 2.0.0
-#:import fit graphics.fit
-#:import center_pos graphics.center_pos
-#:import MDFillRoundFlatIconButton kivymd.uix.button.MDFillRoundFlatIconButton
+#:include activity/tab.kv
+#:import DrawerList graphics.widget.DrawerList
+
+#<ItemDrawer@OneLineIconListItem>:
+
 
 <SplashScreen>:
     RelativeLayout:
@@ -12,28 +14,89 @@
                 pos: self.pos
                 size: self.size
         Image:
-            source: "assets/misc/favicon.png"
+            source: "misc/favicon.png"
             size_hint: 0.5, 0.5
             pos_hint: {"x": 0.25, "y": 0.25}
 
+<ClientScreen>:
 
-<DashboardScreen>:
-    RelativeLayout:
+    avatar: avatar.__self__
+    username: username.__self__
+
+    on_receiving_updateuser:
+        user = args[1].user
+        avatar.source = "sprite/trainer/" + user.avatar + ".png"
+        username.text = user.nickname if user.logged_in else "Logged out"
+
+    on_mouse_pos:
+        if args[1][0] < menu.size[0]: nav.set_state("open")
+        if args[1][0] > nav.size[0]: nav.set_state("close")
+
+    ScreenManager:
+        id: client_screen_manager
+
+        DashboardScreen:
+            id: dashboard
+            name: "dashboard"
+            manager: "client_screen_manager"
+            web_app: app.web_app
+
+    Label:
+        id: menu
         canvas.before:
             Color:
-                rgb: 1, 0.749, 0.894
-        Image:
-            allow_stretch: True
-            keep_ratio: True
-            source: "assets/background/charizard.jpg"
-            size_hint: None, None
-            size: fit(self.texture.size, self.parent.size)
-            pos: center_pos(self.size, self.parent.size)
+                rgb: app.theme_cls.primary_color
+            Rectangle:
+                size: self.size
+        size_hint: 0.05, 1
+        text: " >"
+        font_size: fit_text(self.size, len(self.text))
 
-        MDFillRoundFlatIconButton:
-            id: "play"
-            icon: "pokeball"
-            text: "Battle !"
-            size_hint: 0.2, 0.075
-            font_size: 0.65*min(self.size)
-            pos: center_pos(self.size, self.parent.size, hint=(0.5, 0.05))
+    MDNavigationDrawer:
+
+        id: nav
+
+        size_hint_x: 0.2
+
+        md_bg_color: app.theme_cls.primary_color
+
+        BoxLayout:
+
+            id: content
+
+            orientation: "vertical"
+            padding: "8dp"
+            spacing: "8dp"
+
+            AnchorLayout:
+                id: up
+                anchor_x: "left"
+                size_hint_y: 1/6
+                orientation: "vertical"
+
+                Image:
+                    id: avatar
+                    size_hint: 0.5, 1
+                    source: "sprite/trainer/red.png"
+
+
+            MDLabel:
+                id: username
+                text: "Logged out"
+                font_style: "Button"
+                size_hint_y: None
+                height: self.texture_size[1]
+
+            ScrollView:
+                MDList:
+                    id: md_list
+
+                    OneLineIconListItem:
+                        text: "TeamBuilder"
+                        IconLeftWidget:
+                            icon: "folder"
+
+                    OneLineIconListItem:
+                        text: "Ladder"
+                        IconLeftWidget:
+                            icon: "medal"
