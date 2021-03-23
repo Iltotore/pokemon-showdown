@@ -4,6 +4,7 @@
 #:import fit_text graphics.fit_text
 #:import json json
 #:import center_pos graphics.center_pos
+#:import ShowdownScreen main.ShowdownScreen
 #:import MDFlatButton kivymd.uix.button.MDFlatButton
 #:import FilterDD graphics.widget.FilterDD
 #:import session api.data.session
@@ -17,7 +18,7 @@
     color: 1, 1, 1
     radius: 0,
 
-<DashboardScreen>:
+<DashboardScreen@ShowdownScreen>:
 
     tiers: tiers.__self__
 

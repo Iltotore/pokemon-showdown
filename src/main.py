@@ -44,10 +44,6 @@ class ClientScreen(ShowdownScreen):
         pass
 
 
-class DashboardScreen(ShowdownScreen):
-    pass
-
-
 class MainApp(MDApp):
 
     def __init__(self):
@@ -83,3 +79,4 @@ if __name__ == '__main__':
                            lambda: app.web_app.alive, on_start=wait_for(lambda: app.web_app.alive)
                        ))
     )
+

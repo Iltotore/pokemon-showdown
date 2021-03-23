@@ -1,0 +1,19 @@
+#:kivy 2.0.0
+#:import fit graphics.fit
+#:import fit_text graphics.fit_text
+#:import center_pos graphics.center_pos
+#:import ShowdownScreen main.ShowdownScreen
+#:import MDFlatButton kivymd.uix.button.MDFlatButton
+
+<MDFlatButton>
+    md_bg_color: app.theme_cls.primary_color
+    color: 1, 1, 1
+    radius: 0,
+
+<PokemonEntry@BoxLayout>: # Apparence ici
+
+
+<TeamBuilderScreen@ShowdownScreen>:
+    BoxLayout:
+        id: pokemons
+        PokemonEntry: # Position d'une entrée ENTIERE
