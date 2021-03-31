@@ -1,0 +1,15 @@
+{
+  "name": "Français",
+  "toolbar": {
+    "home": "Menu Principal",
+    "teambuilder": "TeamBuilder",
+    "ladder": "Classement"
+  },
+  "dashboard": {
+    "battle": "Combat",
+    "tier": {
+      "loading": "Chargement des tiers...",
+      "selected": "Tier: {}"
+    }
+  }
+}

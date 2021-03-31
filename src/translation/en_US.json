@@ -1,0 +1,15 @@
+{
+  "name": "English",
+  "toolbar": {
+    "home": "Home",
+    "teambuilder": "TeamBuilder",
+    "ladder": "Ladder"
+  },
+  "dashboard": {
+    "battle": "Battle !",
+    "tier": {
+      "loading": "Loading tiers...",
+      "selected": "Tier: {}"
+    }
+  }
+}
