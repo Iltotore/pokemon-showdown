@@ -1,0 +1,124 @@
+#:kivy 2.0.0
+#:import Clock kivy.clock.Clock
+#:import fit graphics.fit
+#:import fit_text graphics.fit_text
+#:import json json
+#:import center_pos graphics.center_pos
+#:import ShowdownScreen main.ShowdownScreen
+#:import MDFlatButton kivymd.uix.button.MDFlatButton
+#:import FilterDD graphics.widget.FilterDD
+#:import session api.data.session
+
+<FDDButton>:
+    size_hint_y: None
+    height: '50sp'
+
+<MDFlatButton>:
+    md_bg_color: app.theme_cls.primary_color
+    color: 1, 1, 1
+    radius: 0,
+
+<Clickable@ButtonBehavior+BoxLayout>:
+
+<DashboardScreen@ShowdownScreen>:
+
+    teams: teams.__self__
+    team_label: team_label.__self__
+    tiers: tiers.__self__
+    selected_team: selected_team.__self__
+
+    on_receiving_formats:
+        formats = list(filter(session.Format.is_visible, args[1].formats))
+        tiers.entries = [f.name for f in formats]
+        tier.text = "Tier: " + formats[0].name
+
+    on_receiving_updatesearch:
+        d = json.loads(args[2][0])
+        play.text = "Battle !" if len(d["searching"]) == 0 else "Searching"
+
+    on_teams_loaded:
+        team_label.text = "Select a team"
+        print("teams=",app.web_app.team_container.team_dict)
+        teams.entries = [entry[0] for entry in app.web_app.team_container.all_teams()]
+
+    RelativeLayout:
+        Image:
+            allow_stretch: True
+            keep_ratio: True
+            source: "background/charizard.jpg"
+            size_hint: None, None
+            size: fit(self.texture.size, self.parent.size)
+            pos: center_pos(self.size, self.parent.size)
+
+        Clickable:
+            id: selected_team
+            canvas.before:
+                Color:
+                    rgba: 1, 1, 1, 0.5
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+            size_hint: 0.4, 0.2
+            pos: center_pos(self.size, self.parent.size)
+            orientation: "vertical"
+            on_press:
+                teams.open()
+
+            on_release:
+                teams.input_area.focus = True
+
+
+            MDLabel:
+                id: team_label
+                size_hint: 1, 0.3
+                text: "Loading teams..."
+                font_size: fit_text(self.size, len(self.text))
+                halign: "center"
+
+            BoxLayout:
+                size_hint: 1, 0.7
+
+        FilterDD:
+            id: teams
+            pos: selected_team.pos
+            size_hint_x: 0.4
+            on_item_select:
+                app.web_app.select_team(args[1])
+                team_label.text = f"Team: {args[1]}"
+                args[0].dismiss()
+
+        BoxLayout:
+            size_hint: 0.4, 0.075
+            orientation: "horizontal"
+            pos: center_pos(self.size, self.parent.size, hint=(0.5, 0.1))
+
+            MDFlatButton:
+                id: play
+                text: "Battle !"
+                size_hint: 0.5, 1
+                font_size: fit_text(self.size, len(self.text))
+                on_press:
+                    app.web_app.find_battle(None)
+
+            MDFlatButton:
+                id: tier
+                text: "Loading tier"
+                size_hint: 0.5, 1
+                allow_stretch: True
+                font_size: fit_text(self.size, len(self.text))
+                md_bg_color: app.theme_cls.primary_dark
+
+                on_press:
+                    tiers.open()
+
+                on_release:
+                    tiers.input_area.focus = True
+
+        FilterDD:
+            id: tiers
+            pos: tier.pos[0], tier.pos[1]+tier.size[1]
+            size_hint: 0.2, 1
+            on_item_select:
+                app.web_app.select_format(args[1])
+                tier.text = "Tier: " + args[1]
+                args[0].dismiss()

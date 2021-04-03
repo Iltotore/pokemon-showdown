@@ -44,15 +44,11 @@ class TaskQueue(Queue):
 async def worker_while(queue: Queue, condition, interval=0.1, on_start=None, on_stop=None):
     if on_start is not None:
         await on_start
-    print("started")
-    print(condition())
     while condition():
         if not queue.empty():
-            print("message")
             await asyncio.wait([queue.get()(), wait_for(lambda: not condition(), interval)],
                                return_when=asyncio.FIRST_COMPLETED)
         await asyncio.sleep(interval)
-    print("ending")
     if on_stop is not None:
         await on_stop
 

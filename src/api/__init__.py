@@ -1,15 +1,17 @@
-import asyncio
-import os
-import re
 from queue import Queue
-from typing import List
 
 import asyncrequests
 import websockets
 from websockets import ConnectionClosed
 
 from api import concurrency
+from api.data.pokemon import *
 from api.data.session import *
+
+
+def hook_event(obj, name, default=lambda x, y: None):
+    setattr(obj, name, default)
+    obj.register_event_type(name)
 
 
 class ShowdownApp:
@@ -19,10 +21,20 @@ class ShowdownApp:
         self.socket = None
         self.alive = False
 
+        self.team_container = TeamContainer("teams",
+                                            lambda name: parse_named_info(name, [], unknown_species),
+                                            lambda name: parse_named_info(name, [], unknown_item),
+                                            lambda name: parse_named_info(name, [], unknown_ability),
+                                            lambda name: Nature[name.upper()],
+                                            lambda name: parse_named_info(name, [], lambda n: MoveInfo(n)))
+
+        print(self.team_container.team_dict)
+
         self.user = default_user
         self.challstr = ""
         self.formats = []
         self.selected_format = None
+        self.selected_team = None
 
         self.event_dispatchers = []  # GUI event dispatchers
         self.receive_bindings = {  # Other callbacks
@@ -33,6 +45,11 @@ class ShowdownApp:
         }
 
         self.send_queue = Queue()
+
+        self.send_queue.put(lambda: concurrency.with_callback(
+            send=self.team_container.load_teams,
+            callback=lambda x: self.dispatch("on_teams_loaded")
+        ))
 
     async def wait_until_alive(self, futures):
         fs = futures.copy()
@@ -77,15 +94,17 @@ class ShowdownApp:
     def add_dispatcher(self, dispatcher):
         for key in self.receive_bindings.keys():
             event = f"on_receiving_{key}"
-            setattr(dispatcher, event, lambda x, y: None)
-            dispatcher.register_event_type(event)
-        setattr(dispatcher, "on_connection_lost", lambda x, y: None)
-        dispatcher.register_event_type("on_connection_lost")
+            hook_event(dispatcher, event)
+        hook_event(dispatcher, "on_connection_lost")
+        hook_event(dispatcher, "on_teams_loaded")
         self.event_dispatchers.append(dispatcher)
 
     def dispatch(self, event: str, *args):
         for dispatcher in self.event_dispatchers:
-            dispatcher.dispatch(f"on_receiving_{event}", self, args)
+            dispatcher.dispatch(event, self, args)
+
+    def dispatch_packet(self, event: str, *args):
+        self.dispatch(f"on_receiving_{event}", *args)
 
     async def send_async(self, message):
         print("send msg")
@@ -114,22 +133,30 @@ class ShowdownApp:
                 "challstr": self.challstr
             }), callback=self.finish_login))
 
+    def select_team(self, name):
+        self.selected_team = self.team_container[name]
+
     def select_format(self, name):
         for f in self.formats:
             if f.name == name:
                 self.selected_format = f
 
-    def find_battle(self, format: Format = None, team=None):  # TODO Team support
-        if format is None:
-            return self.find_battle(self.selected_format) if self.selected_format is not None else None
-        self.send(f"|/utm null\n/search {format.name}")
+    def find_battle(self, team, format: Format = None):  # TODO Team support
+        print(format, team)
+        if team is None:
+            self.find_battle(self.selected_team, format) if self.selected_team is not None else None
+        elif format is None:
+            self.find_battle(team, self.selected_format) if self.selected_format is not None else None
+        else:
+            battle_team = "null" if team is None else "]".join([pokemon.format() for pokemon in team])
+            self.send(f"|/utm {battle_team}\n/search {format.name}")
 
     def on_message_received(self, header: str, values: List[str]):
         bindings = self.receive_bindings.get(header)
         if bindings is not None:
             for callback in bindings:
                 callback(values)
-            self.dispatch(header, *values)
+            self.dispatch_packet(header, *values)
 
     def bind(self, **kwargs):
         for entry in kwargs:

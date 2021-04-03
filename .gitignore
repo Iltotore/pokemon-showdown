@@ -3,3 +3,5 @@
 bin
 gradle.properties
 .buildozer
+teams
+__pycache__

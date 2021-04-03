@@ -28,7 +28,6 @@ class FilterDD(RelativeLayout, EventDispatcher):
 
         self.input_area.fbind("focus", self.on_focus)
         self.input_area.bind(text=self.update_text)
-        self.input_area.unfocus_on_touch = True
         self.input_area.bind(on_touch_down=self.on_touch_down)
         self.drop_down = DropDown()
         self.add_widget(self.input_area)
@@ -53,7 +52,9 @@ class FilterDD(RelativeLayout, EventDispatcher):
         if value.endswith("\n"):
             widget.text = value[:-1]
             self.apply_filter(value[:-1])
-            self.select(self.drop_down.children[0].children[-1])
+            children = self.drop_down.children[0].children
+            if len(children) > 0:
+                self.select(children[-1])
         else:
             self.apply_filter(value)
 
@@ -81,7 +82,6 @@ class FilterDD(RelativeLayout, EventDispatcher):
         self.drop_down.dismiss()
 
     def real_dismiss(self, *args):
-        print("dismiss")
         self.input_area.set_disabled(True)
         self.input_area.opacity = 0
         self.opened = False
