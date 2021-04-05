@@ -143,10 +143,10 @@ class ShowdownApp:
 
     def find_battle(self, team, format: Format = None):  # TODO Team support
         print(format, team)
-        if team is None:
-            self.find_battle(self.selected_team, format) if self.selected_team is not None else None
-        elif format is None:
+        if format is None:
             self.find_battle(team, self.selected_format) if self.selected_format is not None else None
+        elif team is None and not format.is_random():
+            self.find_battle(self.selected_team, format) if self.selected_team is not None else None
         else:
             battle_team = "null" if team is None else "]".join([pokemon.format() for pokemon in team])
             self.send(f"|/utm {battle_team}\n/search {format.name}")
