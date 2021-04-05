@@ -27,6 +27,7 @@ class Type(Enum):
 
 
 class Stat(Enum):
+    HP = "HP"
     ATTACK = "Atk"
     DEFENSE = "Def"
     SPECIAL_ATTACK = "SpA"
@@ -173,6 +174,7 @@ def mk_string(d: Dict[str, int]):
 
 class PokemonInfo:
 
+    # noinspection PyDefaultArgument
     def __init__(self, species: Species,
                  ability: Ability,
                  moves: Tuple[MoveInfo],
