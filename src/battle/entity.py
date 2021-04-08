@@ -1,12 +1,13 @@
 from enum import Enum
 from typing import List
 
-from api import PokemonInfo
+from api.data.pokemon import PokemonInfo
 
 
 class StatusEffect(Enum):
     BURN = "brn"
     FREEZE = "frz"
+    PARALYSIS = "par"
     POISON = "tox"
     SLEEP = "slp"
 
@@ -33,7 +34,7 @@ class SentPokemon:
     def __init__(self, pokemon: Pokemon, volatile_status: VolatileStatus = None, dynamaxed: bool = False):
         self.pokemon = pokemon
         self.volatile_status = volatile_status
-        self.dynamaxed = False
+        self.dynamaxed = dynamaxed
 
 
 class Player:

@@ -1,5 +1,6 @@
 from typing import List
 
+from api import Client
 from battle.entity import Player
 
 
@@ -24,10 +25,14 @@ class Battle:
         self.state = state
 
 
-class Room:
+class Room(Client):
 
     def __init__(self, room_id: str, title: str, users: List[str], battle: Battle = None):
+        super().__init__()
         self.room_id = room_id
         self.title = title
         self.users = users
         self.battle = battle
+
+    def on_message_received(self, header: str, values: List[str]):
+        print(f"Received {header} in {self.room_id}")

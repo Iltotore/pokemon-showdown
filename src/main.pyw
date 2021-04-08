@@ -6,7 +6,7 @@ from kivy.core.window.window_sdl2 import WindowSDL
 from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition
 from kivymd.app import MDApp
 
-from api import ShowdownApp
+from api.app import ShowdownApp
 from api.concurrency import *
 from graphics import screen_size
 
@@ -72,7 +72,7 @@ if __name__ == '__main__':
         asyncio.gather(app.async_run(),
                        worker_while(
                            TaskQueue(tasks=[lambda: app.web_app.listen()]),
-                           lambda: app.web_app.alive, on_start=app.web_app.open(), on_stop=app.web_app.close()
+                           lambda: app.web_app.alive, on_start=app.web_app.initialize(), on_stop=app.web_app.close()
                        ),
                        worker_while(
                            app.web_app.send_queue,
