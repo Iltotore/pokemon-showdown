@@ -1,0 +1,61 @@
+#:kivy 2.0.0
+#:import fit graphics.fit
+#:import fit_text graphics.fit_text
+#:import center_pos graphics.center_pos
+#:import ShowdownScreen main.ShowdownScreen
+#:import MDFlatButton kivymd.uix.button.MDFlatButton
+
+<MDFlatButton>
+    md_bg_color: app.theme_cls.primary_color
+    color: 1, 1, 1
+    radius: 0,
+
+
+<RoomScreen@ShowdownScreen>:
+
+    chat: chat.__self__
+    open_chat: open_chat.__self__
+    open: True
+
+    RelativeLayout:
+
+        id: panel
+        pos_hint: {"x": 0.05}
+        size_hint_x: 0.95
+
+        Button:
+            id: open_chat
+            text: "Open chat"
+            size_hint: 0.7, 0.2
+            on_press:
+                panel.remove_widget(chat) if open else panel.add_widget(chat)
+                self.size_hint_x = 1 if open else 0.7
+                open = not open
+
+        RelativeLayout:
+
+            id: chat
+
+            orientation: "vertical"
+            padding: "8dp"
+            spacing: "8dp"
+
+            pos_hint: {"x":0.7}
+            size_hint: 0.3, 1
+
+            ScrollView:
+                size_hint: 1, 1
+                pos_hint: {"y": 0.1}
+
+                canvas.before:
+                    Color:
+                        rgb: 0, 0, 0
+                    Rectangle:
+                        size: self.size
+                Label:
+                    text: "Message"
+                    size_hint: 1, 1
+
+            TextInput:
+                id: chat_bar
+                size_hint_y: 0.1

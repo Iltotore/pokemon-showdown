@@ -1,7 +1,7 @@
 import os
 import re
 from enum import Enum, IntEnum
-from typing import Tuple, List, Dict, Any
+from typing import Tuple, List, Dict, Any, Optional
 
 
 class Type(Enum):
@@ -178,7 +178,7 @@ class PokemonInfo:
     def __init__(self, species: Species,
                  ability: Ability,
                  moves: Tuple[MoveInfo],
-                 item: Item,
+                 item: Optional[Item],
                  ivs: Dict[str, int] = {},
                  evs: Dict[str, int] = {},
                  gender: Gender = None,
@@ -323,7 +323,6 @@ class TeamContainer:
                         folder[name] = team
 
         load_subdir(self.root, self.root)
-
 
 if __name__ == '__main__':
     import asyncio, time

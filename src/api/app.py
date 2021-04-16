@@ -11,8 +11,13 @@ from api.data.session import *
 from battle import Room
 
 
+class Unit:  # A dummy class
+    pass
+
+
 def hook_event(obj, name, default=lambda x, y: None):
-    setattr(obj, name, default)
+    if not getattr(obj, name, Unit()) is None:
+        setattr(obj, name, default)
     obj.register_event_type(name)
 
 
@@ -24,12 +29,15 @@ class ShowdownApp(Client):
         self.socket = None
         self.alive = False
 
-        self.team_container = TeamContainer("teams",
-                                            lambda name: parse_named_info(name, [], unknown_species),
-                                            lambda name: parse_named_info(name, [], unknown_item),
-                                            lambda name: parse_named_info(name, [], unknown_ability),
-                                            lambda name: Nature[name.upper()],
-                                            lambda name: parse_named_info(name, [], lambda n: MoveInfo(n)))
+        self.parsers = {
+            "load_species": lambda name: parse_named_info(name, [], unknown_species),
+            "load_item": lambda name: parse_named_info(name, [], unknown_item),
+            "load_ability": lambda name: parse_named_info(name, [], unknown_ability),
+            "load_nature": lambda name: Nature[name.upper()],
+            "load_move": lambda name: parse_named_info(name, [], lambda n: MoveInfo(n))
+        }
+
+        self.team_container = TeamContainer("teams", **self.parsers)
 
         print(self.team_container.team_dict)
 
@@ -66,7 +74,7 @@ class ShowdownApp(Client):
         if room := self.get_room(room_id):
             return room
         else:
-            room = Room(room_id, "", [])
+            room = Room(room_id, "", [], self.parsers)
             self.rooms.append(room)
             return room
 
@@ -115,7 +123,8 @@ class ShowdownApp(Client):
             if parts[0].startswith(">"):
                 room = self.join_room(parts[0][1:])
             for msg in parts:
-                if msg.startswith(">"):
+                print("msg", msg)
+                if parts[0].startswith(">"):
                     continue
                 if msg.startswith("|"):
                     msg = msg[1:]
@@ -186,6 +195,7 @@ class ShowdownApp(Client):
         pass
 
     def on_registered_message_received(self, header: str, values: List[str]):
+        print("registered", header)
         self.dispatch_packet(header, *values)
 
     def bind(self, **kwargs):

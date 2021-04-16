@@ -1,6 +1,7 @@
 #:kivy 2.0.0
 #:include activity/dashboard.kv
 #:include activity/teambuilder.kv
+#:include activity/battle.kv
 #:import DrawerList graphics.widget.DrawerList
 
 #<ItemDrawer@OneLineIconListItem>:
@@ -50,6 +51,12 @@
         TeamBuilderScreen:
             id: teambuilder
             name: "teambuilder"
+            manager: client_screen_manager
+            web_app: app.web_app
+
+        RoomScreen:
+            id: battle_room
+            name: "battle"
             manager: client_screen_manager
             web_app: app.web_app
 
@@ -125,3 +132,12 @@
                         text: "Ladder"
                         IconLeftWidget:
                             icon: "medal"
+
+                    OneLineIconListItem:
+                        text: "Battle room - test"
+
+                        on_press:
+                            client_screen_manager.switch_to(battle_room)
+
+                        IconLeftWidget:
+                            icon: "folder"

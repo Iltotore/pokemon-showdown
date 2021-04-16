@@ -1,7 +1,7 @@
 from enum import Enum
-from typing import List
+from typing import List, Optional, Dict
 
-from api.data.pokemon import PokemonInfo
+from api.data.pokemon import PokemonInfo, Gender, unknown_ability
 
 
 class StatusEffect(Enum):
@@ -21,25 +21,72 @@ class VolatileStatus(Enum):
     UNKNOWN = "unknown"
 
 
+class Weather(Enum):
+    INTENSE_SUN = "DesolateLand",
+    SUN = "SunnyDay",
+    RAIN = "RainDance",
+    HEAVY_RAIN = "PrimordialSea",
+    HAIL = "Hail",
+    SANDSTORM = "Sandstorm",
+    STRONG_WINDS = "DeltaStream"
+
+
 class Pokemon:
 
-    def __init__(self, info: PokemonInfo, health: float = 1, status_effect: StatusEffect = None):
+    def __init__(self, identifier: str, info: PokemonInfo, health: int = 100, max_health=100,
+                 status_effect: Optional[StatusEffect] = None):
+        self.identifier = identifier
         self.info = info
         self.health = health
+        self.max_health = max_health
         self.status_effect = status_effect
+
+    def faint(self):
+        self.health = 0
+
+    def is_fainted(self):
+        return self.health <= 0
+
+    @staticmethod
+    def deserialize(identifier: str, item: str, load_species, load_item):
+        details = identifier.split(", ")
+        # noinspection PyTypeChecker
+        info_kwargs = {
+            "species": load_species(details[0]),
+            "ability": unknown_ability("Unknown"),
+            "moves": (),
+            "item": load_item(item)
+        }
+        for value in details[1:]:
+            if value.startswith("L"):
+                info_kwargs["level"] = int(value[1:])
+            if value == "M" or value == "F":
+                info_kwargs["gender"] = Gender.MALE if value == "M" else Gender.FEMALE
+
+        return Pokemon(identifier, PokemonInfo(**info_kwargs))
 
 
 class SentPokemon:
 
-    def __init__(self, pokemon: Pokemon, volatile_status: VolatileStatus = None, dynamaxed: bool = False):
+    def __init__(self, pokemon: Pokemon, volatile_status: Optional[VolatileStatus] = None, dynamaxed: bool = False):
         self.pokemon = pokemon
         self.volatile_status = volatile_status
         self.dynamaxed = dynamaxed
 
+    def faint(self):
+        self.pokemon.faint()  # Future animation
+
 
 class Player:
 
-    def __init__(self, user: str, team: List[Pokemon], sent: SentPokemon = None):
-        self.user = user
+    def __init__(self, username: str, trainer: int, team: List[Pokemon] = [], rating: Optional[int] = None,
+                 sent: Dict[str, SentPokemon] = {}):
+        self.username = username
+        self.trainer = trainer
         self.team = team
+        self.rating = rating
         self.sent = sent
+
+    @staticmethod
+    def deserialize(username: str, trainer: str, rating: str):
+        return Player(username, int(trainer), rating=None if rating is None else int(rating))
