@@ -52,7 +52,8 @@ class Battle(Client):
                 setattr(pokemon, "health", int(health_and_max[0])),
                 setattr(pokemon, "max_health", int(health_and_max[1]))
             ),
-            "-weather": lambda values: setattr(self, "weather", Weather(values[0]))
+            "-weather": lambda values: setattr(self, "weather", Weather(values[0])),
+            "-curestatus": lambda values: setattr(self.get_sent_pokemon(values[0]).pokemon, "status_effect", None)
         }
 
     def is_fully_loaded(self) -> bool:
