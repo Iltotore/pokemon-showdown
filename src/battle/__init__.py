@@ -57,7 +57,11 @@ class Battle(Client):
             "-curestatus": lambda values: setattr(self.get_sent_pokemon(values[0]).pokemon, "status_effect", None),
             "-cureteam": lambda values: (setattr(pokemon, "status_effect", None) for pokemon in
                                          self.get_player(values[0][:-1]).team),
-
+            "-item": lambda values: setattr(self.get_sent_pokemon(values[0]).pokemon.info, "item",
+                                            self.parsers["load_item"](values[1])),
+            "-enditem": lambda values: setattr(self.get_sent_pokemon(values[0]).pokemon.info, "item", None),
+            "-ability": lambda values: setattr(self.get_sent_pokemon(values[0]).pokemon.info, "ability",
+                                               self.parsers["load_ability"](values[1]))
         }
 
     def is_fully_loaded(self) -> bool:
