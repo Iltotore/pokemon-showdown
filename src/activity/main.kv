@@ -3,9 +3,7 @@
 #:include activity/teambuilder.kv
 #:include activity/battle.kv
 #:import DrawerList graphics.widget.DrawerList
-
-#<ItemDrawer@OneLineIconListItem>:
-
+#:import Tab graphics.widget.Tab
 
 <SplashScreen>:
     RelativeLayout:
@@ -28,6 +26,10 @@
     client_screen_manager: client_screen_manager.__self__
     dashboard: dashboard.__self__
     teambuilder: teambuilder.__self__
+
+    tabs: tabs.__self__
+
+
 
     on_receiving_updateuser:
         user = args[1].user
@@ -76,7 +78,6 @@
         id: nav
 
         size_hint_x: 0.2
-
         md_bg_color: app.theme_cls.primary_color
 
         BoxLayout:
@@ -108,36 +109,31 @@
 
             ScrollView:
                 MDList:
-                    id: md_list
+                    id: tabs
 
-                    OneLineIconListItem:
+                    Tab:
                         text: "Home"
+                        icon: "home"
+                        screen_manager: client_screen_manager
+                        screen: dashboard
 
-                        on_press:
-                            client_screen_manager.switch_to(dashboard)
-
-                        IconLeftWidget:
-                            icon: "home"
-
-                    OneLineIconListItem:
+                    Tab:
                         text: "TeamBuilder"
+                        icon: "folder"
+                        screen_manager: client_screen_manager
+                        screen: teambuilder
 
-                        on_press:
-                            client_screen_manager.switch_to(teambuilder)
-
-                        IconLeftWidget:
-                            icon: "folder"
-
-                    OneLineIconListItem:
+                    Tab:
                         text: "Ladder"
-                        IconLeftWidget:
-                            icon: "medal"
+                        icon: "medal"
+                        screen_manager: client_screen_manager
 
-                    OneLineIconListItem:
+                    MDSeparator:
+                        padding: 8, 8, 8, 8
+                        color: 0, 0, 0, 1
+
+                    Tab:
                         text: "Battle room - test"
-
-                        on_press:
-                            client_screen_manager.switch_to(battle_room)
-
-                        IconLeftWidget:
-                            icon: "folder"
+                        icon: "folder"
+                        screen_manager: client_screen_manager
+                        screen: battle_room

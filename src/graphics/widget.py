@@ -1,11 +1,32 @@
+from kivy.clock import Clock
 from kivy.event import EventDispatcher
 from kivy.factory import Factory
+from kivy.properties import StringProperty
 from kivy.uix.button import Button
 from kivy.uix.dropdown import DropDown
 from kivy.uix.relativelayout import RelativeLayout
 from kivy.uix.textinput import TextInput
 from kivymd.theming import ThemableBehavior
-from kivymd.uix.list import MDList
+from kivymd.uix.list import MDList, OneLineIconListItem, IconLeftWidget
+
+
+class Tab(OneLineIconListItem):
+    icon = StringProperty("folder")
+
+    def __init__(self, **kwargs):
+        super(Tab, self).__init__(**kwargs)
+        self.screen = None
+        self.screen_manager = None
+        self.icon_widget = IconLeftWidget(icon=self.icon)
+        self.bind(icon=self.icon_widget.setter("icon"))
+        Clock.schedule_once(self.on_start)
+
+    def on_start(self, *args):
+        self.add_widget(self.icon_widget)
+
+    def on_press(self):
+        if self.screen is not None and self.screen_manager is not None:
+            self.screen_manager.switch_to(self.screen)
 
 
 class FDDButton(Button):
