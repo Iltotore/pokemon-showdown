@@ -1,4 +1,5 @@
 import kivy
+from kivy import Config
 from kivy.app import Builder, App
 from kivy.clock import Clock
 from kivy.core.window import Window
@@ -26,7 +27,12 @@ class ShowdownScreen(Screen):
 
     def __init__(self, **kw):
         App.get_running_app().web_app.add_dispatcher(self)
+        self.register_event_type("on_start")
         super().__init__(**kw)
+        Clock.schedule_once(self.on_start)
+
+    def on_start(self, *args):
+        pass
 
 
 class SplashScreen(Screen):
@@ -39,6 +45,7 @@ class ClientScreen(ShowdownScreen):
         self.register_event_type("on_mouse_pos")
         super().__init__(**kw)
         Window.bind(mouse_pos=lambda w, pos: self.dispatch("on_mouse_pos", pos))
+        App.get_running_app().web_app.tabs = self.ids["tabs"]
 
     def on_mouse_pos(self, pos):
         pass
@@ -51,8 +58,8 @@ class MainApp(MDApp):
         self.title = "Pokemon Showdown"
         self.icon = "misc/favicon.png"
         Builder.load_file("activity/main.kv")
-        self.web_app = ShowdownApp()
         self.sm = ScreenManager(transition=FadeTransition())
+        self.web_app = ShowdownApp(self.sm)
         self.sm.add_widget(SplashScreen(name="splash"))
         self.sm.add_widget(ClientScreen(name="client"))
 
@@ -66,6 +73,7 @@ class MainApp(MDApp):
 
 
 if __name__ == '__main__':
+    Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
     adapt_window(Window, (0.75, 0.75))
     app = MainApp()
     asyncio.get_event_loop().run_until_complete(
@@ -79,4 +87,3 @@ if __name__ == '__main__':
                            lambda: app.web_app.alive, on_start=wait_for(lambda: app.web_app.alive)
                        ))
     )
-
