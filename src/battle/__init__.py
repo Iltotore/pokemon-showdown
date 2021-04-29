@@ -39,6 +39,7 @@ class Battle(Client):
         self.state = state
         self.weather = weather
 
+        # TODO https://github.com/smogon/pokemon-showdown/blob/master/sim/SIM-PROTOCOL.md#minor-actions
         self.receive_bindings = {
             "teampreview": lambda _: setattr(self, "state", State.PREVIEW),
             "start": lambda _: setattr(self, "state", State.BATTLING),
@@ -61,7 +62,15 @@ class Battle(Client):
                 setattr(pokemon, "health", int(health_and_max[0])),
                 setattr(pokemon, "max_health", int(health_and_max[1]))
             ),
-            "-weather": lambda values: setattr(self, "weather", Weather(values[0]))
+            "-weather": lambda values: setattr(self, "weather", Weather(values[0])),
+            "-curestatus": lambda values: setattr(self.get_sent_pokemon(values[0]).pokemon, "status_effect", None),
+            "-cureteam": lambda values: (setattr(pokemon, "status_effect", None) for pokemon in
+                                         self.get_player(values[0][:-1]).team),
+            "-item": lambda values: setattr(self.get_sent_pokemon(values[0]).pokemon.info, "item",
+                                            self.parsers["load_item"](values[1])),
+            "-enditem": lambda values: setattr(self.get_sent_pokemon(values[0]).pokemon.info, "item", None),
+            "-ability": lambda values: setattr(self.get_sent_pokemon(values[0]).pokemon.info, "ability",
+                                               self.parsers["load_ability"](values[1]))
         }
 
     def is_fully_loaded(self) -> bool:
