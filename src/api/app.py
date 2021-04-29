@@ -1,3 +1,4 @@
+import asyncio
 from queue import Queue
 
 import asyncrequests
@@ -220,7 +221,7 @@ class ShowdownApp(Client):
 
         avatar = values[2]
         if not os.path.isfile(f"sprite/trainer/{avatar}.png"):
-            avatar = "red"
+            avatar = "unknown"
 
         self.user = user_from_json(nickname=values[0], logged_in=values[1] == "1", avatar=avatar, data=values[3])
         print("updated", self.user.avatar, self.user.logged_in, values[1] == "1", avatar)
