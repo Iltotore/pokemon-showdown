@@ -12,6 +12,9 @@ class Client:
     def __init__(self):
         self.receive_bindings = {}
 
+    def tick(self):
+        pass
+
     def on_message_received(self, header: str, values: List[str]):
         bindings = self.receive_bindings.get(header)
         print(bindings)

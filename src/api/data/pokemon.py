@@ -324,6 +324,7 @@ class TeamContainer:
 
         load_subdir(self.root, self.root)
 
+
 if __name__ == '__main__':
     import asyncio, time
 

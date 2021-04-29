@@ -5,31 +5,109 @@
 #:import ShowdownScreen main.ShowdownScreen
 #:import MDFlatButton kivymd.uix.button.MDFlatButton
 
-<MDFlatButton>
+<MDFlatButton>:
     md_bg_color: app.theme_cls.primary_color
     color: 1, 1, 1
-    radius: 0,
+    _radius: 0
+
+<PokemonButton@MDFillRoundFlatIconButton>:
+    text: "Bulbazaur"
+    font_size: fit_text(self.size, len(self.text))
+    icon: "pokeball"
+    _radius: 5
+
+<MoveButton@MDFillRoundFlatButton>:
+    text: "Bulbazaur"
+    font_size: fit_text(self.size, len(self.text))
+    _radius: 15
 
 
-<RoomScreen@ShowdownScreen>:
+<RoomScreen>:
 
     chat: chat.__self__
-    open_chat: open_chat.__self__
+    panel: panel.__self__
     open: True
 
     RelativeLayout:
 
-        id: panel
+        id: base
         pos_hint: {"x": 0.05}
         size_hint_x: 0.95
 
-        Button:
-            id: open_chat
-            text: "Open chat"
-            size_hint: 0.7, 0.2
-            on_press:
-                panel.remove_widget(chat) if open else panel.add_widget(chat)
-                self.size_hint_x = 1 if open else 0.7
+        RelativeLayout:
+            # Colors are only for the test
+            canvas.before:
+                Color:
+                    rgb: 1, 0, 0
+                Rectangle:
+                    size: self.size
+            id: panel
+            size_hint: 0.7, 1
+
+            RelativeLayout:
+                id: battle
+                canvas.before:
+                    Color:
+                        rgb: 0.49, 0.49, 0.49
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+                size_hint: 1, 0.4
+
+            BoxLayout:
+                id: team
+                size_hint: 0.9, 0.08
+                pos: center_pos(self.size, self.parent.size, hint=(0.5, 0.3))
+                spacing: 8
+                PokemonButton:
+                    text: "Fermite"
+                    size_hint: 1, 1
+                PokemonButton:
+                    text: "Pyrax"
+                    size_hint: 1, 1
+                PokemonButton:
+                    text: "Scarhino"
+                    size_hint: 1, 1
+
+            GridLayout:
+                cols: 2
+                rows: 2
+                size_hint: 0.7, 0.2
+                pos: center_pos(self.size, self.parent.size, hint=(0.5, 0.05))
+                spacing: 8
+                MoveButton:
+                    text: "Pisto-poing"
+                    size_hint: 0.25, 0.25
+                MoveButton:
+                    text: "Danse-lames"
+                    size_hint: 0.25, 0.25
+                MoveButton:
+                    text: "Demi-tour"
+                    size_hint: 0.25, 0.25
+                MoveButton:
+                    text: "Atterrissage"
+                    size_hint: 0.25, 0.25
+
+            MDFillRoundFlatButton:
+                id: timer
+                text: "8:00"
+                size_hint: 0.1, 0.05
+                pos: center_pos(self.size, self.parent.size, hint=(0.975, 0.12))
+                icon: "timer-outline"
+
+
+
+        MDFlatButton:
+            size_hint: 0.05, 0.1
+            pos_hint: {"right": chat.pos_hint["x"], "y": 0.45}
+            text: ">"
+            font_size: fit_text(self.size, len(self.text))
+            background_down: ""
+            on_release:
+                base.remove_widget(chat) if open else base.add_widget(chat)
+                self.pos_hint = {"right": 1 if open else chat.pos_hint["x"], "y": 0.45}
+                self.text = "<" if open else ">"
+                panel.size_hint_x = 1 if open else 0.7
                 open = not open
 
         RelativeLayout:

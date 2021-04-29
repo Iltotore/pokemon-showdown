@@ -29,8 +29,6 @@
 
     tabs: tabs.__self__
 
-
-
     on_receiving_updateuser:
         user = args[1].user
         avatar.source = "sprite/trainer/" + user.avatar + ".png"
@@ -39,6 +37,9 @@
     on_mouse_pos:
         if args[1][0] < menu.size[0]: nav.set_state("open")
         if args[1][0] > nav.size[0]: nav.set_state("close")
+
+    on_start:
+        app.web_app.tabs = self
 
     ScreenManager:
         id: client_screen_manager

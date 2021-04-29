@@ -1,7 +1,14 @@
 from typing import List, Optional, Dict, Callable, Any
 
+from kivy.uix.label import Label
+from kivy.uix.screenmanager import Screen
+
 from api import Client
 from battle.entity import Player, Pokemon, SentPokemon, StatusEffect, Weather
+
+
+class RoomScreen(Screen):
+    pass
 
 
 class State:
@@ -21,12 +28,14 @@ class Battle(Client):
 
     def __init__(self, player: Optional[Player], opponent: Optional[Player],
                  parsers: Dict[str, Callable[[List[str]], Any]],
+                 screen: Screen,
                  state: State = State.PREVIEW,
                  weather: Optional[Weather] = None):
         super().__init__()
         self.player = player
         self.opponent = opponent
         self.parsers = parsers
+        self.screen = screen
         self.state = state
         self.weather = weather
 
@@ -78,22 +87,36 @@ class Battle(Client):
         print(f"{winner} won the game !")
 
     @staticmethod
-    def empty(parsers: Dict[str, Callable[[List[str]], None]]):
-        return Battle(None, None, parsers)
+    def empty(parsers: Dict[str, Callable[[List[str]], None]], screen: Screen):
+        return Battle(None, None, parsers, screen)
 
 
 class Room(Client):
 
-    def __init__(self, room_id: str, title: str, users: List[str], parsers: Dict[str, Callable[[List[str]], None]],
+    def __init__(self, room_id: str, title: str, users: List[str],
+                 parsers: Dict[str, Callable[[List[str]], None]],
+                 tab: Label,
+                 screen: Screen,
                  battle: Optional[Battle] = None):
         super().__init__()
         self.room_id = room_id
         self.title = title
         self.users = users
         self.parsers = parsers
-        self.battle = Battle.empty(parsers) if battle is None else battle
+        self.tab = tab
+        self.screen = screen
+
+        self.battle = Battle.empty(parsers, screen) if battle is None else battle
+
+        self.receive_bindings = {
+            "title": lambda values: (
+                setattr(self.tab, "text", values[0]),
+                print(self.tab)
+            )
+        }
 
     def on_message_received(self, header: str, values: List[str]):
         print(f"Received {header} with {','.join(values)} in {self.room_id}")
+        super().on_message_received(header, values)
         if self.battle is not None:
             self.battle.on_message_received(header, values)

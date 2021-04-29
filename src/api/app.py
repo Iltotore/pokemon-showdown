@@ -1,14 +1,15 @@
-import asyncio
 from queue import Queue
 
 import asyncrequests
 import websockets
+from kivy.uix.screenmanager import ScreenManager, Screen
 from websockets import ConnectionClosed
 
 from api import concurrency, Client
 from api.data.pokemon import *
 from api.data.session import *
 from battle import Room
+from graphics.widget import Tab
 
 
 class Unit:  # A dummy class
@@ -23,8 +24,11 @@ def hook_event(obj, name, default=lambda x, y: None):
 
 class ShowdownApp(Client):
 
-    def __init__(self):
+    def __init__(self, screen_manager: ScreenManager):
         super().__init__()
+        self.tabs = None
+        self.screen_manager = screen_manager
+
         self.uri = "ws://sim.smogon.com:8000/showdown/websocket"
         self.socket = None
         self.alive = False
@@ -70,11 +74,21 @@ class ShowdownApp(Client):
             if room.room_id == room_id:
                 return room
 
+    def create_room(self, room_id: str):
+
+        screen = Screen(name=room_id)
+        self.screen_manager.add_widget(screen)
+
+        tab = Tab(text=room_id)
+        self.tabs.add_widget(tab)
+
+        return Room(room_id, "", [], self.parsers, tab, screen)
+
     def join_room(self, room_id: str):
-        if room := self.get_room(room_id):
+        if (room := self.get_room(room_id)) is not None:
             return room
         else:
-            room = Room(room_id, "", [], self.parsers)
+            room = self.create_room(room_id)
             self.rooms.append(room)
             return room
 
@@ -88,7 +102,6 @@ class ShowdownApp(Client):
                                    return_when=asyncio.FIRST_COMPLETED))[0].pop().result()
 
     async def initialize(self):
-
         return await self.open()
 
     async def open(self):
@@ -119,12 +132,12 @@ class ShowdownApp(Client):
             print("disonnected", error)
         else:
             room = self
-            parts = messages.split("\n|")
-            if parts[0].startswith(">"):
-                room = self.join_room(parts[0][1:])
-            for msg in parts:
+            lines = messages.split("\n|")
+            if lines[0].startswith(">"):
+                room = self.join_room(lines[0][1:])
+            for msg in lines:
                 print("msg", msg)
-                if parts[0].startswith(">"):
+                if msg.startswith(">"):
                     continue
                 if msg.startswith("|"):
                     msg = msg[1:]
