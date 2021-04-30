@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import List, Optional, Dict
 
-from api.data.pokemon import PokemonInfo, Gender, unknown_ability
+from api.data.pokemon import PokemonInfo, Gender, unknown_ability, Stat
 
 
 class StatusEffect(Enum):
@@ -68,8 +68,10 @@ class Pokemon:
 
 class SentPokemon:
 
-    def __init__(self, pokemon: Pokemon, volatile_status: Optional[VolatileStatus] = None, dynamaxed: bool = False):
+    def __init__(self, pokemon: Pokemon, stats_changes: Dict[Stat, float] = {},
+                 volatile_status: Optional[VolatileStatus] = None, dynamaxed: bool = False):
         self.pokemon = pokemon
+        self.stats_changes = stats_changes
         self.volatile_status = volatile_status
         self.dynamaxed = dynamaxed
 
