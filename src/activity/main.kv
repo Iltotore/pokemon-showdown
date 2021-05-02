@@ -4,6 +4,7 @@
 #:include activity/battle.kv
 #:import DrawerList graphics.widget.DrawerList
 #:import Tab graphics.widget.Tab
+#:import CloseableTab graphics.widget.CloseableTab
 
 <SplashScreen>:
     RelativeLayout:
@@ -133,7 +134,7 @@
                         padding: 8, 8, 8, 8
                         color: 0, 0, 0, 1
 
-                    Tab:
+                    CloseableTab:
                         text: "Battle room - test"
                         icon: "folder"
                         screen_manager: client_screen_manager

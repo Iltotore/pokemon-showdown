@@ -44,7 +44,7 @@ class HoverBehaviour(Widget):
         pass
 
 
-class Tab(OneLineIconListItem, HoverBehaviour):
+class Tab(OneLineIconListItem):
     icon = StringProperty("folder")
 
     def __init__(self, **kwargs):
@@ -62,11 +62,29 @@ class Tab(OneLineIconListItem, HoverBehaviour):
         if self.screen is not None and self.screen_manager is not None:
             self.screen_manager.switch_to(self.screen)
 
+
+class CloseableTab(Tab, HoverBehaviour):
+
+    def __init__(self, **kwargs):
+        self.register_event_type("on_close")
+        super(CloseableTab, self).__init__(**kwargs)
+        self.closing = False
+        self.icon_widget.bind(on_press=lambda w, *args: self.close())
+
     def on_enter(self, widget, *args):
         self.icon_widget.icon = "close"
 
     def on_exit(self, widget, *args):
         self.icon_widget.icon = self.icon
+
+    def on_close(self, *args):
+        pass
+
+    def close(self, force=False):
+        self.closing = True
+        self.dispatch("on_close")
+        if self.closing or force:
+            self.parent.remove_widget(self)
 
 
 class FDDButton(Button):
