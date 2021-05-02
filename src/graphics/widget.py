@@ -1,16 +1,50 @@
 from kivy.clock import Clock
 from kivy.event import EventDispatcher
 from kivy.factory import Factory
-from kivy.properties import StringProperty
+from kivy.properties import StringProperty, BooleanProperty
 from kivy.uix.button import Button
 from kivy.uix.dropdown import DropDown
 from kivy.uix.relativelayout import RelativeLayout
 from kivy.uix.textinput import TextInput
+from kivy.uix.widget import Widget
 from kivymd.theming import ThemableBehavior
 from kivymd.uix.list import MDList, OneLineIconListItem, IconLeftWidget
 
 
-class Tab(OneLineIconListItem):
+class HoverBehaviour(Widget):
+    hover = BooleanProperty(True)
+
+    def __init__(self, **kwargs):
+        self.register_event_type("on_enter")
+        self.register_event_type("on_exit")
+        super(HoverBehaviour, self).__init__(**kwargs)
+
+    def corners_abs(self):
+        abs_x, abs_y = self.to_window(self.x, self.y)
+        return abs_x, abs_y, abs_x + self.size[0], abs_y + self.size[1]
+
+    def collide_abs(self, x, y):
+        abs_x, abs_y, abs_right, abs_top = self.corners_abs()
+        return abs_x <= x <= abs_right and abs_y <= y <= abs_top
+
+    def update_mouse(self, x, y):
+        if self.collide_abs(x, y):
+            if not self.hover:
+                self.dispatch("on_enter", x, y)
+            self.hover = True
+        else:
+            if self.hover:
+                self.dispatch("on_exit", x, y)
+            self.hover = False
+
+    def on_enter(self, widget, *args):
+        pass
+
+    def on_exit(self, widget, *args):
+        pass
+
+
+class Tab(OneLineIconListItem, HoverBehaviour):
     icon = StringProperty("folder")
 
     def __init__(self, **kwargs):
@@ -27,6 +61,12 @@ class Tab(OneLineIconListItem):
     def on_press(self):
         if self.screen is not None and self.screen_manager is not None:
             self.screen_manager.switch_to(self.screen)
+
+    def on_enter(self, widget, *args):
+        self.icon_widget.icon = "close"
+
+    def on_exit(self, widget, *args):
+        self.icon_widget.icon = self.icon
 
 
 class FDDButton(Button):

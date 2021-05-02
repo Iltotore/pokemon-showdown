@@ -5,11 +5,13 @@ from kivy.clock import Clock
 from kivy.core.window import Window
 from kivy.core.window.window_sdl2 import WindowSDL
 from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition
+from kivy.uix.widget import Widget
 from kivymd.app import MDApp
 
 from api.app import ShowdownApp
 from api.concurrency import *
 from graphics import screen_size
+from graphics.widget import HoverBehaviour
 
 kivy.require('2.0.0')
 
@@ -28,10 +30,25 @@ class ShowdownScreen(Screen):
     def __init__(self, **kw):
         App.get_running_app().web_app.add_dispatcher(self)
         self.register_event_type("on_start")
+        self.register_event_type("on_mouse_pos")
         super().__init__(**kw)
+        Window.bind(mouse_pos=lambda w, pos: self.mouse_pos_update(pos))
         Clock.schedule_once(self.on_start)
 
     def on_start(self, *args):
+        pass
+
+    def mouse_pos_update(self, pos):
+        self.update_collision(pos[0], pos[1], self)
+        self.dispatch("on_mouse_pos", pos)
+
+    def update_collision(self, x, y, widget: Widget):
+        if isinstance(widget, HoverBehaviour):
+            widget.update_mouse(x, y)
+        for child in widget.children:
+            self.update_collision(x, y, child)
+
+    def on_mouse_pos(self, pos):
         pass
 
 
@@ -42,9 +59,7 @@ class SplashScreen(Screen):
 class ClientScreen(ShowdownScreen):
 
     def __init__(self, **kw):
-        self.register_event_type("on_mouse_pos")
         super().__init__(**kw)
-        Window.bind(mouse_pos=lambda w, pos: self.dispatch("on_mouse_pos", pos))
         App.get_running_app().web_app.tabs = self.ids["tabs"]
 
     def on_mouse_pos(self, pos):
