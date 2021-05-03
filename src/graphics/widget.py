@@ -66,6 +66,7 @@ class Tab(OneLineIconListItem):
 class CloseableTab(Tab, HoverBehaviour):
 
     def __init__(self, **kwargs):
+        self.register_event_type("on_close_request")
         self.register_event_type("on_close")
         super(CloseableTab, self).__init__(**kwargs)
         self.closing = False
@@ -77,13 +78,17 @@ class CloseableTab(Tab, HoverBehaviour):
     def on_exit(self, widget, *args):
         self.icon_widget.icon = self.icon
 
+    def on_close_request(self, *args):
+        pass
+
     def on_close(self, *args):
         pass
 
     def close(self, force=False):
         self.closing = True
-        self.dispatch("on_close")
+        self.dispatch("on_close_request")
         if self.closing or force:
+            self.dispatch("on_close")
             self.parent.remove_widget(self)
 
 
