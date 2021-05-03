@@ -106,6 +106,7 @@ class Room(Client):
                  parsers: Dict[str, Callable[[List[str]], None]],
                  tab: Label,
                  screen: Screen,
+                 parent: Client,
                  battle: Optional[Battle] = None):
         super().__init__()
         self.room_id = room_id
@@ -114,6 +115,7 @@ class Room(Client):
         self.parsers = parsers
         self.tab = tab
         self.screen = screen
+        self.parent = parent
 
         self.battle = Battle.empty(parsers, screen) if battle is None else battle
 
@@ -123,6 +125,9 @@ class Room(Client):
                 print(self.tab)
             )
         }
+
+    def send(self, message: str):
+        self.parent.send(f"{self.room_id}|{message}")
 
     def on_message_received(self, header: str, values: List[str]):
         print(f"Received {header} with {','.join(values)} in {self.room_id}")

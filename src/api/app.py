@@ -10,7 +10,7 @@ from api import concurrency, Client
 from api.data.pokemon import *
 from api.data.session import *
 from battle import Room
-from graphics.widget import Tab
+from graphics.widget import CloseableTab
 
 
 class Unit:  # A dummy class
@@ -60,7 +60,7 @@ class ShowdownApp(Client):
             "updateuser": [self.on_user_update]
         }
 
-        self.rooms = []
+        self.rooms = {}
         self.listened_room = None
 
         self.send_queue = Queue()
@@ -70,28 +70,31 @@ class ShowdownApp(Client):
             callback=lambda x: self.dispatch("on_teams_loaded")
         ))
 
-    def get_room(self, room_id: str) -> Room:
-        for room in self.rooms:
-            if room.room_id == room_id:
-                return room
+    def get_room(self, room_id: str) -> Optional[Room]:
+        return self.rooms.get(room_id)
 
     def create_room(self, room_id: str):
 
         screen = Screen(name=room_id)
         self.screen_manager.add_widget(screen)
 
-        tab = Tab(text=room_id)
+        tab = CloseableTab(text=room_id)
+        tab.bind(on_close=lambda *args: self.leave_room(room_id))
         self.tabs.add_widget(tab)
 
-        return Room(room_id, "", [], self.parsers, tab, screen)
+        return Room(room_id, "", [], self.parsers, tab, screen, self)
 
     def join_room(self, room_id: str):
         if (room := self.get_room(room_id)) is not None:
             return room
         else:
             room = self.create_room(room_id)
-            self.rooms.append(room)
+            self.rooms[room_id] = room
             return room
+
+    def leave_room(self, room_id: str):
+        self.send(f"{room_id}|/leave")
+        self.rooms.pop(room_id, None)
 
     def listen_room(self, room_id):
         self.listened_room = self.join_room(room_id)
@@ -135,7 +138,13 @@ class ShowdownApp(Client):
             room = self
             lines = messages.split("\n|")
             if lines[0].startswith(">"):
-                room = self.join_room(lines[0][1:])
+                print(lines)
+                if lines[1].startswith("init"):
+                    print("Joining room", lines[0][1:])
+                    room = self.join_room(lines[0][1:])
+                elif new := self.get_room(lines[0][1:]):
+                    room = new
+
             for msg in lines:
                 print("msg", msg)
                 if msg.startswith(">"):
