@@ -32,6 +32,7 @@ Once Python is installed, open the terminal and enter the following command:
 python -m pip install <package>
 ```
 Note: You can chain packages to install: `python -m pip install kivy kivymd etc...`
+
 Note 2: If `python` is not found, try `python3` or `py`.
 
 </details>
